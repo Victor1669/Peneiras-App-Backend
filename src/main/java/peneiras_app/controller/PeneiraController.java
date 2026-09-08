@@ -5,10 +5,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 import peneiras_app.dto.PeneiraCreateDTO;
 import peneiras_app.dto.PeneiraResponseDTO;
 import peneiras_app.dto.PeneiraUpdateDTO;
 import peneiras_app.dto.PeneiraUpdateResponseDTO;
+import peneiras_app.dto.GetPeneirasDTO;
+
 import peneiras_app.entity.Peneira;
 import peneiras_app.service.CreatePeneiraService;
 import peneiras_app.service.EditPeneiraService;
@@ -59,7 +62,7 @@ public class PeneiraController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PeneiraResponseDTO>> getAll() {
+    public ResponseEntity<List<GetPeneirasDTO>> getAll() {
 
         return ResponseEntity.ok(
                 getPeneirasService.getAll()
@@ -75,8 +78,8 @@ public class PeneiraController {
 
         UUID clubeId = (UUID) authentication.getPrincipal();
 
-        PeneiraUpdateResponseDTO response =
-                editPeneiraService.execute(id, clubeId, dto);
+        PeneiraUpdateResponseDTO response
+                = editPeneiraService.execute(id, clubeId, dto);
 
         return ResponseEntity.ok(response);
     }
