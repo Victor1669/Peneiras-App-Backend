@@ -4,20 +4,31 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import peneiras_app.security.JwtAuthenticationFilter;
+import peneiras_app.security.RestAccessDeniedHandler;
+import peneiras_app.security.RestAuthenticationEntryPoint;
 
 @Configuration
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RestAccessDeniedHandler restAccessDeniedHandler;
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            RestAccessDeniedHandler restAccessDeniedHandler,
+            RestAuthenticationEntryPoint restAuthenticationEntryPoint
+    ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.restAccessDeniedHandler = restAccessDeniedHandler;
+        this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
     }
 
     @Bean
@@ -32,45 +43,29 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-
                 .authorizeHttpRequests(auth -> auth
 
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/api/auth/clube/register",
+                        "/auth/register",
+                        "/auth/forgot-password",
+                        "/auth/verify-code",
+                        "/auth/reset-password",
+                        "/auth/login"
+                ).permitAll()
 
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/auth/login"
-                        ).permitAll()
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/peneiras"
+                ).permitAll()
 
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/auth/forgot-password",
-                                "/auth/verify-code",
-                                "/auth/reset-password"
-                        ).permitAll()
-
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/auth/register"
-                        ).permitAll()
-
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/auth/clube/register"
-                        ).permitAll()
-
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/peneiras"
-                        ).permitAll()
-
-
-                        .anyRequest().authenticated()
+                .anyRequest().authenticated()
                 )
-
+                .exceptionHandling((ExceptionHandlingConfigurer<HttpSecurity> handling) -> handling
+                        .accessDeniedHandler(restAccessDeniedHandler)
+                        .authenticationEntryPoint(restAuthenticationEntryPoint)
+                )
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class

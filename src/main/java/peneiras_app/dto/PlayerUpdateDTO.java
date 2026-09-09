@@ -1,73 +1,41 @@
 package peneiras_app.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import peneiras_app.entity.enums.DominantFoot;
 import peneiras_app.entity.enums.Position;
 
 import java.time.LocalDate;
 
-public class PlayerUpdateDTO {
+public record PlayerUpdateDTO(
 
-    private String name;
-    private String email;
-    private LocalDate birthDate;
-    private Position position;
-    private DominantFoot dominantFoot;
-    private Integer heightCm;
-    private String userImg;
+        String name,
 
-    public String getName() {
-        return name;
-    }
+        @Email(message = "E-mail inválido")
+        String email,
 
-    public void setName(String name) {
-        this.name = name;
-    }
+        LocalDate birthDate,
 
-    public String getEmail() {
-        return email;
-    }
+        Position position,
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+        DominantFoot dominantFoot,
 
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
+        Integer heightCm,
 
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
-    }
+        String userImg,
 
-    public Position getPosition() {
-        return position;
-    }
+        // Endereço (opcional)
+        @Pattern(
+                regexp = "^(\\d{8}|\\d{5}-\\d{3})?$",
+                message = "CEP inválido"
+        )
+        String cep,
 
-    public void setPosition(Position position) {
-        this.position = position;
-    }
+        @Size(max = 20, message = "Número deve ter no máximo 20 caracteres")
+        String numero,
 
-    public DominantFoot getDominantFoot() {
-        return dominantFoot;
-    }
-
-    public void setDominantFoot(DominantFoot dominantFoot) {
-        this.dominantFoot = dominantFoot;
-    }
-
-    public Integer getHeightCm() {
-        return heightCm;
-    }
-
-    public void setHeightCm(Integer heightCm) {
-        this.heightCm = heightCm;
-    }
-
-    public String getUserImg() {
-        return userImg;
-    }
-
-    public void setUserImg(String userImg) {
-        this.userImg = userImg;
-    }
+        @Size(max = 100, message = "Complemento deve ter no máximo 100 caracteres")
+        String complemento
+) {
 }
