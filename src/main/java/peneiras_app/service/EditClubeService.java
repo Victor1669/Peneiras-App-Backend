@@ -3,7 +3,6 @@ package peneiras_app.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import peneiras_app.dto.ClubeResponseDTO;
 import peneiras_app.dto.ClubeUpdateDTO;
 import peneiras_app.dto.ViaCepResponseDTO;
 import peneiras_app.entity.Clube;
@@ -35,7 +34,7 @@ public class EditClubeService {
     }
 
     @Transactional
-    public ClubeResponseDTO execute(UUID userId, ClubeUpdateDTO dto, MultipartFile photo) throws IOException {
+    public void execute(UUID userId, ClubeUpdateDTO dto, MultipartFile photo) throws IOException {
 
         Clube clube = clubeRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Clube não encontrado"));
@@ -52,43 +51,41 @@ public class EditClubeService {
         clube.setWhatsapp(dto.whatsapp());
         clube.setInstagramAccount(dto.instagramAccount());
 
-        // Foto
         if (photo != null && !photo.isEmpty()) {
             String imageUrl = cloudinaryService.uploadImage(photo);
             clube.setClubeImg(imageUrl);
         }
 
-        // Endereço (só processa se CEP e número forem enviados)
-        if (dto.cep() != null && !dto.cep().isBlank()
-                && dto.numero() != null && !dto.numero().isBlank()) {
+        var address = dto.address();
 
-            ViaCepResponseDTO viaCep = viaCepService.buscarCep(dto.cep());
+        if (address != null && address.cep() != null && !address.cep().isBlank()
+                && address.numero() != null && !address.numero().isBlank()) {
+
+            ViaCepResponseDTO viaCep = viaCepService.buscarCep(address.cep());
             if (viaCep == null || viaCep.isErro()) {
                 throw new RuntimeException("CEP não encontrado ou inválido");
             }
 
-            Endereco endereco = clube.getAddress(); // pega o endereço atual (se existir)
+            Endereco endereco = clube.getAddress();
 
             if (endereco == null) {
-                // Não tem endereço ainda → cria um novo
                 endereco = new Endereco(
                         viaCep.getLogradouro(),
                         viaCep.getBairro(),
-                        dto.numero(),
+                        address.numero(),
                         viaCep.getCep(),
                         viaCep.getLocalidade(),
                         viaCep.getUf(),
-                        dto.complemento()
+                        address.complemento()
                 );
             } else {
-                // Já tem endereço → atualiza os campos
-                viaCep.setLogradouro(viaCep.getLogradouro());
+                endereco.setRua(viaCep.getLogradouro());
                 endereco.setBairro(viaCep.getBairro());
-                endereco.setNumero(dto.numero());
+                endereco.setNumero(address.numero());
                 endereco.setCep(viaCep.getCep());
-                viaCep.setLocalidade(viaCep.getLocalidade());
-                viaCep.setUf(viaCep.getUf());
-                endereco.setComplemento(dto.complemento());
+                endereco.setCidade(viaCep.getLocalidade());
+                endereco.setEstado(viaCep.getUf());
+                endereco.setComplemento(address.complemento());
             }
 
             endereco = enderecoRepository.save(endereco);
@@ -96,7 +93,5 @@ public class EditClubeService {
         }
 
         clubeRepository.save(clube);
-
-        return new ClubeResponseDTO("Clube atualizado com sucesso");
     }
 }

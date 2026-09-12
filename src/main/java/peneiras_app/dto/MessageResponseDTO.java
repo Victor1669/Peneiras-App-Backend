@@ -1,6 +1,6 @@
 package peneiras_app.dto;
 
-public record ClubeResponseDTO(
+public record MessageResponseDTO(
         String message
 ) {
 }

@@ -3,8 +3,6 @@ package peneiras_app.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import peneiras_app.dto.PlayerDataDTO;
-import peneiras_app.dto.PlayerResponseDTO;
 import peneiras_app.dto.PlayerUpdateDTO;
 import peneiras_app.dto.ViaCepResponseDTO;
 import peneiras_app.entity.Endereco;
@@ -36,7 +34,7 @@ public class EditPlayerService {
     }
 
     @Transactional
-    public PlayerResponseDTO execute(UUID playerId, PlayerUpdateDTO dto, MultipartFile photo) throws IOException {
+    public void execute(UUID playerId, PlayerUpdateDTO dto, MultipartFile photo) throws IOException {
 
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new RuntimeException("Player não encontrado"));
@@ -70,10 +68,12 @@ public class EditPlayerService {
             player.setUserImg(imageUrl);
         }
 
-        if (dto.cep() != null && !dto.cep().isBlank()
-                && dto.numero() != null && !dto.numero().isBlank()) {
+        var address = dto.address();
 
-            ViaCepResponseDTO viaCep = viaCepService.buscarCep(dto.cep());
+        if (address != null && address.cep() != null && !address.cep().isBlank()
+                && address.numero() != null && !address.numero().isBlank()) {
+
+            ViaCepResponseDTO viaCep = viaCepService.buscarCep(address.cep());
             if (viaCep == null || viaCep.isErro()) {
                 throw new RuntimeException("CEP não encontrado ou inválido");
             }
@@ -84,38 +84,26 @@ public class EditPlayerService {
                 endereco = new Endereco(
                         viaCep.getLogradouro(),
                         viaCep.getBairro(),
-                        dto.numero(),
+                        address.numero(),
                         viaCep.getCep(),
                         viaCep.getLocalidade(),
                         viaCep.getUf(),
-                        dto.complemento()
+                        address.complemento()
                 );
             } else {
-                viaCep.setLogradouro(viaCep.getLogradouro());
+                endereco.setRua(viaCep.getLogradouro());
                 endereco.setBairro(viaCep.getBairro());
-                endereco.setNumero(dto.numero());
+                endereco.setNumero(address.numero());
                 endereco.setCep(viaCep.getCep());
-                viaCep.setLocalidade(viaCep.getLocalidade());
-                viaCep.setUf(viaCep.getUf());
-                endereco.setComplemento(dto.complemento());
+                endereco.setCidade(viaCep.getLocalidade());
+                endereco.setEstado(viaCep.getUf());
+                endereco.setComplemento(address.complemento());
             }
 
             endereco = enderecoRepository.save(endereco);
             player.setAddress(endereco);
         }
 
-        Player updatedPlayer = playerRepository.save(player);
-
-        PlayerDataDTO playerData = new PlayerDataDTO(
-                updatedPlayer.getName(),
-                updatedPlayer.getEmail(),
-                updatedPlayer.getBirthDate(),
-                updatedPlayer.getPosition(),
-                updatedPlayer.getDominantFoot(),
-                updatedPlayer.getHeightCm(),
-                updatedPlayer.getUserImg()
-        );
-
-        return new PlayerResponseDTO("Player atualizado com sucesso", playerData);
+        playerRepository.save(player);
     }
 }
