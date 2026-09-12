@@ -47,8 +47,8 @@ public class SecurityConfig {
 
                 .requestMatchers(
                         HttpMethod.POST,
-                        "/api/auth/clube/register",
-                        "/auth/register",
+                        "/clubes/register",
+                        "/players/register",
                         "/auth/forgot-password",
                         "/auth/verify-code",
                         "/auth/reset-password",

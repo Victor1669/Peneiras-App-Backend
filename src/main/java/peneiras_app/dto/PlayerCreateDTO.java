@@ -1,5 +1,6 @@
 package peneiras_app.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -34,6 +35,8 @@ public class PlayerCreateDTO {
     @NotNull
     private Integer heightCm;
 
+    @Valid
+    private AddressDTO address;
 
     public String getName() {
         return name;
@@ -91,4 +94,11 @@ public class PlayerCreateDTO {
         this.heightCm = heightCm;
     }
 
+    public AddressDTO getAddress() {
+        return address;
+    }
+
+    public void setAddress(AddressDTO address) {
+        this.address = address;
+    }
 }

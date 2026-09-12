@@ -20,22 +20,23 @@ public class CreateClubeService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Clube create(ClubeCreateDTO dto) {
+    public void create(ClubeCreateDTO dto) {
 
-        if (clubeRepository.existsByEmail(dto.getEmail())) {
+        if (clubeRepository.existsByEmail(dto.email())) {
             throw new IllegalArgumentException("Email já cadastrado");
         }
 
         Clube clube = new Clube();
 
-        clube.setName(dto.getName());
-        clube.setEmail(dto.getEmail());
-        clube.setPassword(passwordEncoder.encode(dto.getPassword()));
-        clube.setCategory(dto.getCategory());
-        clube.setPhone(dto.getPhone());
-        clube.setWhatsapp(dto.getWhatsapp());
-        clube.setInstagramAccount(dto.getInstagramAccount());
+        clube.setName(dto.name());
+        clube.setEmail(dto.email());
+        clube.setPassword(passwordEncoder.encode(dto.password()));
+        clube.setCategory(dto.category());
+        clube.setPhone(dto.phone());
+        clube.setWhatsapp(dto.whatsapp());
+        clube.setInstagramAccount(dto.instagramAccount());
 
-        return clubeRepository.save(clube);
+        clubeRepository.save(clube);
+
     }
 }

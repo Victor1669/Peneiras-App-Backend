@@ -22,7 +22,7 @@ public class CreatePlayerService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Player create(PlayerCreateDTO dto) {
+    public void create(PlayerCreateDTO dto) {
 
         if (playerRepository.existsByEmail(dto.getEmail())) {
             throw new RuntimeException("E-mail ja cadastrado");
@@ -48,6 +48,6 @@ public class CreatePlayerService {
         player.setDominantFoot(dto.getDominantFoot());
         player.setHeightCm(dto.getHeightCm());
 
-        return playerRepository.save(player);
+        playerRepository.save(player);
     }
 }
