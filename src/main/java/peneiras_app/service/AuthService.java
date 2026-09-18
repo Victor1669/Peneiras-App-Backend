@@ -162,8 +162,7 @@ public class AuthService {
 
         String encodedPassword =
                 passwordEncoder.encode(newPassword);
-
-        // PLAYER
+        
 
         Player player = playerRepository
                 .findByEmail(email)
@@ -180,7 +179,7 @@ public class AuthService {
             return;
         }
 
-        // CLUBE
+
 
         Clube clube = clubeRepository
                 .findByEmail(email)
