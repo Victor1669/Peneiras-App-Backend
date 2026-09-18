@@ -81,7 +81,6 @@ src/main/java/peneiras_app/
 ├── dto/             # Data Transfer Objects
 ├── entity/          # Entidades do banco de dados
 ├── exception/       # Tratamento de exceções
-├── integration/     # Integrações com serviços externos
 ├── repository/      # Acesso aos dados
 ├── security/        # Configurações de segurança
 ├── service/         # Regras de negócio
