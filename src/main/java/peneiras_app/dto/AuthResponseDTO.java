@@ -3,18 +3,28 @@ package peneiras_app.dto;
 public class AuthResponseDTO {
 
     private String message;
-    private String token;
+    private String accessToken;
+    private String refreshToken;
 
-    public AuthResponseDTO(String message, String token) {
+    public AuthResponseDTO(
+            String message,
+            String accessToken,
+            String refreshToken
+    ) {
         this.message = message;
-        this.token = token;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public String getToken() {
-        return token;
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
     }
 }

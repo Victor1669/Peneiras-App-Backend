@@ -6,6 +6,7 @@ import peneiras_app.dto.AuthDTO;
 import peneiras_app.dto.AuthResponseDTO;
 import peneiras_app.entity.Clube;
 import peneiras_app.entity.Player;
+import peneiras_app.entity.RefreshToken;
 import peneiras_app.repository.ClubeRepository;
 import peneiras_app.repository.PlayerRepository;
 import peneiras_app.security.JwtService;
@@ -20,6 +21,7 @@ public class AuthService {
     private final EmailService emailService;
     private final ResetCodeService resetCodeService;
     private final PasswordResetService passwordResetService;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthService(
             PlayerRepository playerRepository,
@@ -28,7 +30,8 @@ public class AuthService {
             JwtService jwtService,
             EmailService emailService,
             ResetCodeService resetCodeService,
-            PasswordResetService passwordResetService
+            PasswordResetService passwordResetService,
+            RefreshTokenService refreshTokenService
     ) {
         this.playerRepository = playerRepository;
         this.clubeRepository = clubeRepository;
@@ -37,6 +40,7 @@ public class AuthService {
         this.emailService = emailService;
         this.resetCodeService = resetCodeService;
         this.passwordResetService = passwordResetService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     public AuthResponseDTO login(AuthDTO dto) {
@@ -54,13 +58,17 @@ public class AuthService {
                 throw new RuntimeException("Email ou senha inválidos");
             }
 
-            String token = jwtService.generateToken(
+            String accessToken = jwtService.generateToken(
                     player.getId()
             );
 
+            RefreshToken refreshToken =
+                    refreshTokenService.createRefreshToken(player);
+
             return new AuthResponseDTO(
                     "Login realizado com sucesso",
-                    token
+                    accessToken,
+                    refreshToken.getToken()
             );
         }
 
@@ -77,21 +85,57 @@ public class AuthService {
                 throw new RuntimeException("Email ou senha inválidos");
             }
 
-            String token = jwtService.generateToken(
+            String accessToken = jwtService.generateToken(
                     clube.getId()
             );
 
+            RefreshToken refreshToken =
+                    refreshTokenService.createRefreshToken(clube);
+
             return new AuthResponseDTO(
                     "Login realizado com sucesso",
-                    token
+                    accessToken,
+                    refreshToken.getToken()
             );
         }
 
         throw new RuntimeException("Email ou senha inválidos");
     }
 
+    public AuthResponseDTO refreshToken(String token) {
 
+        RefreshToken refreshToken =
+                refreshTokenService.findByToken(token);
 
+        refreshTokenService.verifyExpiration(refreshToken);
+
+        String accessToken;
+
+        if (refreshToken.getPlayer() != null) {
+
+            accessToken = jwtService.generateToken(
+                    refreshToken.getPlayer().getId()
+            );
+
+        } else if (refreshToken.getClube() != null) {
+
+            accessToken = jwtService.generateToken(
+                    refreshToken.getClube().getId()
+            );
+
+        } else {
+
+            throw new RuntimeException(
+                    "Refresh token sem usuário associado"
+            );
+        }
+
+        return new AuthResponseDTO(
+                "Token renovado com sucesso",
+                accessToken,
+                refreshToken.getToken()
+        );
+    }
 
     public void forgotPassword(String email) {
 
@@ -128,7 +172,6 @@ public class AuthService {
         throw new RuntimeException("Email não encontrado");
     }
 
-
     public void verifyResetCode(
             String email,
             String code
@@ -143,7 +186,6 @@ public class AuthService {
             throw new RuntimeException("Código inválido");
         }
     }
-
 
     public void resetPassword(
             String email,
@@ -162,7 +204,6 @@ public class AuthService {
 
         String encodedPassword =
                 passwordEncoder.encode(newPassword);
-        
 
         Player player = playerRepository
                 .findByEmail(email)
@@ -171,15 +212,12 @@ public class AuthService {
         if (player != null) {
 
             player.setPassword(encodedPassword);
-
             playerRepository.save(player);
 
             passwordResetService.removeCode(email);
 
             return;
         }
-
-
 
         Clube clube = clubeRepository
                 .findByEmail(email)
@@ -188,7 +226,6 @@ public class AuthService {
         if (clube != null) {
 
             clube.setPassword(encodedPassword);
-
             clubeRepository.save(clube);
 
             passwordResetService.removeCode(email);

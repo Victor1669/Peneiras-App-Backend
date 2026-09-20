@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import peneiras_app.dto.AuthDTO;
 import peneiras_app.dto.AuthResponseDTO;
 import peneiras_app.dto.ForgotPasswordDTO;
+import peneiras_app.dto.RefreshTokenRequestDTO;
 import peneiras_app.dto.ResetPasswordDTO;
 import peneiras_app.dto.VerifyCodeDTO;
 import peneiras_app.service.AuthService;
@@ -26,9 +27,17 @@ public class AuthController {
     public ResponseEntity<AuthResponseDTO> login(
             @Valid @RequestBody AuthDTO dto
     ) {
-
         return ResponseEntity.ok(
                 authService.login(dto)
+        );
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponseDTO> refreshToken(
+            @RequestBody RefreshTokenRequestDTO dto
+    ) {
+        return ResponseEntity.ok(
+                authService.refreshToken(dto.refreshToken())
         );
     }
 
@@ -36,10 +45,7 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(
             @RequestBody ForgotPasswordDTO dto
     ) {
-
-        authService.forgotPassword(
-                dto.email()
-        );
+        authService.forgotPassword(dto.email());
 
         return ResponseEntity.ok(
                 Map.of(
@@ -49,12 +55,10 @@ public class AuthController {
         );
     }
 
-
     @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(
             @RequestBody VerifyCodeDTO dto
     ) {
-
         authService.verifyResetCode(
                 dto.email(),
                 dto.code()
@@ -68,12 +72,10 @@ public class AuthController {
         );
     }
 
-
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(
             @RequestBody ResetPasswordDTO dto
     ) {
-
         authService.resetPassword(
                 dto.email(),
                 dto.code(),

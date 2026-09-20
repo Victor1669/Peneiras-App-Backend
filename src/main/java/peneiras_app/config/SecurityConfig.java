@@ -43,29 +43,39 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
 
-                .requestMatchers(
-                        HttpMethod.POST,
-                        "/clubes/register",
-                        "/players/register",
-                        "/auth/forgot-password",
-                        "/auth/verify-code",
-                        "/auth/reset-password",
-                        "/auth/login"
-                ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/clubes/register",
+                                "/players/register",
+                                "/auth/forgot-password",
+                                "/auth/verify-code",
+                                "/auth/reset-password",
+                                "/auth/login",
+                                "/auth/refresh"
+                        ).permitAll()
 
-                .requestMatchers(
-                        HttpMethod.GET,
-                        "/peneiras"
-                ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/peneiras"
+                        ).permitAll()
 
-                .anyRequest().authenticated()
+                        .anyRequest().authenticated()
                 )
-                .exceptionHandling((ExceptionHandlingConfigurer<HttpSecurity> handling) -> handling
-                        .accessDeniedHandler(restAccessDeniedHandler)
-                        .authenticationEntryPoint(restAuthenticationEntryPoint)
+
+                .exceptionHandling(
+                        (ExceptionHandlingConfigurer<HttpSecurity> handling) ->
+                                handling
+                                        .accessDeniedHandler(
+                                                restAccessDeniedHandler
+                                        )
+                                        .authenticationEntryPoint(
+                                                restAuthenticationEntryPoint
+                                        )
                 )
+
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
