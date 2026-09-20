@@ -81,7 +81,6 @@ src/main/java/peneiras_app/
 ├── dto/             # Data Transfer Objects
 ├── entity/          # Entidades do banco de dados
 ├── exception/       # Tratamento de exceções
-├── integration/     # Integrações com serviços externos
 ├── repository/      # Acesso aos dados
 ├── security/        # Configurações de segurança
 ├── service/         # Regras de negócio
@@ -173,7 +172,7 @@ Antes de executar o projeto, certifique-se de possuir:
 ### 1. Clone o repositório
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
+git clone https://github.com/pietros133/Peneiras-App-Backend
 ```
 
 ### 2. Entre na pasta do projeto
