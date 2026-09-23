@@ -17,8 +17,9 @@ import peneiras_app.dto.MessageResponseDTO;
 import peneiras_app.entity.Peneira;
 import peneiras_app.service.CreatePeneiraService;
 import peneiras_app.service.EditPeneiraService;
+import peneiras_app.service.GetPeneiraByClubeIdService;
 import peneiras_app.service.GetPeneiraService;
-import peneiras_app.service.GetPeneiraByIdService;
+import peneiras_app.service.GetPeneiraByPeneiraIdService;
 
 @RestController
 @RequestMapping("/peneiras")
@@ -27,18 +28,21 @@ public class PeneiraController {
     private final CreatePeneiraService createPeneiraService;
     private final GetPeneiraService getPeneirasService;
     private final EditPeneiraService editPeneiraService;
-    private final GetPeneiraByIdService getPeneiraByIdService;
+    private final GetPeneiraByPeneiraIdService getPeneiraByPeneiraIdService;
+    private final GetPeneiraByClubeIdService getPeneiraByClubeIdService;
 
     public PeneiraController(
             CreatePeneiraService createPeneiraService,
             GetPeneiraService getPeneirasService,
             EditPeneiraService editPeneiraService,
-            GetPeneiraByIdService getPeneiraByIdService
+            GetPeneiraByPeneiraIdService getPeneiraByPeneiraIdService,
+            GetPeneiraByClubeIdService getPeneiraByClubeIdService
     ) {
         this.createPeneiraService = createPeneiraService;
         this.getPeneirasService = getPeneirasService;
         this.editPeneiraService = editPeneiraService;
-        this.getPeneiraByIdService = getPeneiraByIdService;
+        this.getPeneiraByPeneiraIdService = getPeneiraByPeneiraIdService;
+        this.getPeneiraByClubeIdService = getPeneiraByClubeIdService;
     }
 
     @PostMapping
@@ -92,7 +96,30 @@ public class PeneiraController {
     ) {
 
         PeneiraDTO response
-                = getPeneiraByIdService.execute(id);
+                = getPeneiraByPeneiraIdService.execute(id);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/clube")
+    public ResponseEntity<List<GetPeneirasDTO>> getPeneirasByClubeId(
+            Authentication authentication
+    ) {
+
+        boolean isClube = authentication.getAuthorities()
+                .stream()
+                .anyMatch(
+                        authority -> authority.getAuthority().equals("ROLE_CLUBE")
+                );
+
+        if (!isClube) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        UUID clubeId = (UUID) authentication.getPrincipal();
+
+        List<GetPeneirasDTO> response
+                = getPeneiraByClubeIdService.execute(clubeId);
 
         return ResponseEntity.ok(response);
     }

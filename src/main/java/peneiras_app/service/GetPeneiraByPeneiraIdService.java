@@ -17,19 +17,19 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class GetPeneiraByIdService {
+public class GetPeneiraByPeneiraIdService {
 
     private final PeneiraRepository peneiraRepository;
     private final ObjectMapper objectMapper;
 
-    public GetPeneiraByIdService(PeneiraRepository peneiraRepository, ObjectMapper objectMapper) {
+    public GetPeneiraByPeneiraIdService(PeneiraRepository peneiraRepository, ObjectMapper objectMapper) {
         this.peneiraRepository = peneiraRepository;
         this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
     public PeneiraDTO execute(UUID id) {
-        GetPeneiraProjection item = peneiraRepository.findByIdComUniformes(id)
+        GetPeneiraProjection item = peneiraRepository.findByPeneiraIdComUniformes(id)
                 .orElseThrow(() -> new RuntimeException("Peneira não encontrada"));
 
         Set<Uniform> uniforms = parseUniforms(item.getUniforms());
