@@ -3,6 +3,7 @@ package peneiras_app.controller;
 import java.util.List;
 import java.util.UUID;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,25 +26,20 @@ import peneiras_app.service.GetPeneiraByPeneiraIdService;
 @RequestMapping("/peneiras")
 public class PeneiraController {
 
-    private final CreatePeneiraService createPeneiraService;
-    private final GetPeneiraService getPeneirasService;
-    private final EditPeneiraService editPeneiraService;
-    private final GetPeneiraByPeneiraIdService getPeneiraByPeneiraIdService;
-    private final GetPeneiraByClubeIdService getPeneiraByClubeIdService;
+    @Autowired
+    private CreatePeneiraService createPeneiraService;
 
-    public PeneiraController(
-            CreatePeneiraService createPeneiraService,
-            GetPeneiraService getPeneirasService,
-            EditPeneiraService editPeneiraService,
-            GetPeneiraByPeneiraIdService getPeneiraByPeneiraIdService,
-            GetPeneiraByClubeIdService getPeneiraByClubeIdService
-    ) {
-        this.createPeneiraService = createPeneiraService;
-        this.getPeneirasService = getPeneirasService;
-        this.editPeneiraService = editPeneiraService;
-        this.getPeneiraByPeneiraIdService = getPeneiraByPeneiraIdService;
-        this.getPeneiraByClubeIdService = getPeneiraByClubeIdService;
-    }
+    @Autowired
+    private GetPeneiraService getPeneirasService;
+
+    @Autowired
+    private EditPeneiraService editPeneiraService;
+
+    @Autowired
+    private GetPeneiraByPeneiraIdService getPeneiraByPeneiraIdService;
+
+    @Autowired
+    private GetPeneiraByClubeIdService getPeneiraByClubeIdService;
 
     @PostMapping
     public ResponseEntity<PeneiraResponseDTO> create(
@@ -91,11 +87,11 @@ public class PeneiraController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PeneiraDTO> getPeneiraDetails(
+    public ResponseEntity<PeneiraResponseDTO> getPeneiraDetails(
             @PathVariable UUID id
     ) {
 
-        PeneiraDTO response
+        PeneiraResponseDTO response
                 = getPeneiraByPeneiraIdService.execute(id);
 
         return ResponseEntity.ok(response);
